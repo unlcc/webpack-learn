@@ -5,7 +5,7 @@ const webpack = require('webpack');
 const path = require('path');
 const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 const smp = new SpeedMeasurePlugin();
-const Happypack = require('happypack');
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 const webPackconfig = {
     mode: "development",
@@ -29,41 +29,39 @@ const webPackconfig = {
         rules: [
             {
                 test: /\.jsx?$/,
-                use: 'Happypack/loader?id=js',
+                use: ['babel-loader'],
                 exclude: /node_modules/ 
             },
             {
                 test: /\.(le|c)ss$/,
-                use: 'Happypack/loader?id=css',
-                // use: ['cache-loader', 'style-loader', 'css-loader', {
-                //     loader: 'postcss-loader',
-                //     options: {
-                //         plugins: function () {
-                //             return [
-                //                 require('autoprefixer')({
-                //                     "overrideBrowserslist": [
-                //                         ">0.25%",
-                //                         "not dead"
-                //                     ]
-                //                 })
-                //             ]
-                //         }
-                //     }
-                // }, 'less-loader'],
+                use: ['cache-loader', 'style-loader', 'css-loader', {
+                    loader: 'postcss-loader',
+                    options: {
+                        plugins: function () {
+                            return [
+                                require('autoprefixer')({
+                                    "overrideBrowserslist": [
+                                        ">0.25%",
+                                        "not dead"
+                                    ]
+                                })
+                            ]
+                        }
+                    }
+                }, 'less-loader'],
                 exclude: /node_modules/
             },
             {
                 test: /\.(png|jpg|gif|jpeg|webp|svg|eot|ttf|woff|woff2)$/,
-                use: 'Happypack/loader?id=file',
-                // use: ['cache-loader',
-                //     {
-                //         loader: 'url-loader',
-                //         options: {
-                //             limit: 10240, //10K
-                //             name: '[name]_[hash:6].[ext]'
-                //         }
-                //     }
-                // ],
+                use: ['cache-loader',
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: 10240, //10K
+                            name: '[name]_[hash:6].[ext]'
+                        }
+                    }
+                ],
                 exclude: /node_modules/
             }
         ]
@@ -93,40 +91,7 @@ const webPackconfig = {
         new webpack.ProvidePlugin({
             Vue: ['Vue', 'default'],
         }),
-        new Happypack({
-            id: 'js',
-            use: ['babel-loader']
-        }),
-        new Happypack({
-            id: 'css',
-            use: ['style-loader', 'css-loader', {
-                loader: 'postcss-loader',
-                options: {
-                    plugins: function () {
-                        return [
-                            require('autoprefixer')({
-                                "overrideBrowserslist": [
-                                    ">0.25%",
-                                    "not dead"
-                                ]
-                            })
-                        ]
-                    }
-                }
-            }, 'less-loader']
-        }),
-        new Happypack({
-            id: 'file',
-            use: [
-                {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10240, //10K
-                        name: '[name]_[hash:6].[ext]'
-                    }
-                }
-            ]
-        })
+        new HardSourceWebpackPlugin()
     ]
 }
 
